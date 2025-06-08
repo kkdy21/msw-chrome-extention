@@ -43,12 +43,3 @@ chrome.runtime.onMessage.addListener((message, sender) => {
   }
   return true; // 비동기 응답이 전송될 수 있음을 나타냅니다.
 });
-
-/*
-1. 아래부분 이해가 안감 무슨역할?
-// 패널의 다른 메시지들을 콘텐츠 스크립트로 중계합니다.
-    if (connections[message.tabId]) {
-      chrome.tabs.sendMessage(message.tabId, message);
-    }
-devtools, panel은 어디서 보여지는건지? chrome 개발자도구 탭?
-*/

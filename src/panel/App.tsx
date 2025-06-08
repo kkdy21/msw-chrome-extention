@@ -104,9 +104,3 @@ function App() {
 }
 
 export default App;
-
-/*
- 1. chrome.devtools.inspectedWindow 란
- 2. chrome.runtime.connect({ name: "devtools-panel" }) 의미. name 역할?
- 3. SSoT?
-*/
