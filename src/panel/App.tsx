@@ -75,6 +75,8 @@ function App() {
   if (loading) return <div>MSW 핸들러 로딩 중...</div>;
   if (error) return <div className="error">{error}</div>;
 
+  console.log("groupedHandlers", groupedHandlers);
+
   return (
     <div className="container">
       <h1>MSW Controls</h1>

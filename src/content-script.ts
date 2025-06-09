@@ -1,3 +1,5 @@
+console.log("MSW DevTools Controller: content-script loaded");
+
 // 페이지의 커스텀 이벤트를 수신하고 백그라운드 스크립트에 알립니다.
 window.addEventListener("mswStateChanged", () => {
   console.log("ContentScript: 'mswStateChanged' 이벤트 감지. 패널에 알림.");
@@ -6,6 +8,8 @@ window.addEventListener("mswStateChanged", () => {
 
 // 백그라운드 스크립트로부터의 메시지(명령/요청)를 수신합니다.
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  console.log("content-script onMessage request", request);
+  console.log("content-script onMessage sender", sender);
   if (typeof window.mswControl === "undefined") {
     // mswControl이 아직 준비되지 않았으면 아무것도 할 수 없습니다.
     // 페이지가 완전히 로드되기 전에 패널이 열리면 발생할 수 있습니다.
