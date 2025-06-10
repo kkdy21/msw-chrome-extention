@@ -1,17 +1,20 @@
 import { MockHandlerInfo } from "@/types/types";
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 // 올바른 타입 경로를 위해 상대 경로 사용
 
 type GroupedHandlers = Record<string, MockHandlerInfo[]>;
 
 function App() {
-  const [handlers, setHandlers] = useState<MockHandlerInfo[]>([]);
+  const [handlers, setHandlers] = useState<MockHandlerInfo[] | null>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const portRef = useRef<chrome.runtime.Port | null>(null);
 
-  useEffect(() => {
-    // 백그라운드 스크립트와 연결 설정
+  const inititialize = useCallback(() => {
+    console.log("패널 초기화 및 백그라운드 연결을 시작합니다...");
+
+    portRef.current?.disconnect();
+
     const port = chrome.runtime.connect({ name: "devtools-panel" });
     portRef.current = port;
 
@@ -43,14 +46,12 @@ function App() {
         });
       }
     });
-
-    return () => {
-      port.disconnect();
-      portRef.current = null;
-    };
   }, []);
 
   const groupedHandlers = useMemo<GroupedHandlers>(() => {
+    if (!handlers) {
+      return {};
+    }
     return handlers.reduce((acc, handler) => {
       const group = handler.groupName || "Uncategorized";
       if (!acc[group]) {
@@ -72,10 +73,30 @@ function App() {
     }
   };
 
+  useEffect(() => {
+    // 백그라운드 스크립트와 연결 설정
+    inititialize();
+
+    const handleNavigated = (url: string) => {
+      console.log(
+        `페이지가 다음 주소로 이동했습니다. ${url} 연결을 재초기화합니다.`
+      );
+      inititialize();
+    };
+
+    chrome.devtools.network.onNavigated.addListener(handleNavigated);
+
+    return () => {
+      chrome.devtools.network.onNavigated.removeListener(handleNavigated);
+      if (portRef.current) {
+        portRef.current.disconnect();
+        portRef.current = null;
+      }
+    };
+  }, [inititialize]);
+
   if (loading) return <div>MSW 핸들러 로딩 중...</div>;
   if (error) return <div className="error">{error}</div>;
-
-  console.log("groupedHandlers", groupedHandlers);
 
   return (
     <div className="container">

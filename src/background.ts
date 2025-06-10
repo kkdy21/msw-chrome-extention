@@ -5,14 +5,11 @@ interface PortConnections {
 const connections: PortConnections = {};
 
 chrome.runtime.onConnect.addListener((port) => {
-  console.log("onConnect port", port);
   // DevTools 패널로부터의 메시지 리스너
   const devToolsListener = (message: any, port: chrome.runtime.Port) => {
-    console.log("devToolsListener message", message);
     // 패널로부터의 첫 메시지에는 탭 ID가 포함됩니다.
     if (message.name === "init") {
       connections[message.tabId] = port;
-      console.log("connections 추가 connections : ", connections);
       // 연결이 설정되었음을 패널에 알립니다.
       port.postMessage({ type: "INIT_SUCCESS" });
       return;
@@ -42,8 +39,6 @@ chrome.runtime.onConnect.addListener((port) => {
 
 // 콘텐츠 스크립트로부터의 메시지 리스너
 chrome.runtime.onMessage.addListener((message, sender) => {
-  console.log("content-scriptmessage", message);
-  console.log("sender", sender);
   // 콘텐츠 스크립트의 메시지를 올바른 DevTools 패널로 중계합니다.
   if (sender.tab?.id && connections[sender.tab.id]) {
     connections[sender.tab.id].postMessage(message);
