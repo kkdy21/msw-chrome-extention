@@ -40,7 +40,7 @@ window.addEventListener("message", (event) => {
     return;
   }
 
-  const { type, payload } = event.data;
+  const { type } = event.data;
 
   switch (type) {
     case "GET_MSW_HANDLERS_RESPONSE":
@@ -58,5 +58,12 @@ window.addEventListener("message", (event) => {
         type: "STATE_CHANGED_NOTIFICATION",
       });
       break;
+    case "MSW_NOT_FOUND":
+      chrome.runtime.sendMessage({
+        type: "MSW_NOT_FOUND_NOTIFICATION",
+      });
+      break;
   }
+
+  return true;
 });

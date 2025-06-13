@@ -8,49 +8,56 @@ window.addEventListener("message", async (event) => {
     !event.data ||
     !event.data.type ||
     event.data.source !== "msw-devtools-content-script"
-  )
+  ) {
     return;
+  }
+
+  if (!window?.mswControl) {
+    window.postMessage(
+      {
+        source,
+        type: "MSW_NOT_FOUND",
+        payload: null,
+      },
+      "*"
+    );
+    return;
+  }
 
   const { type, payload } = event.data;
 
-  // A. 핸들러 목록 가져오기 요청
-  if (type === "GET_MSW_HANDLERS_REQUEST") {
-    if (window.mswControl?.getHandlers) {
-      const handlers = window.mswControl.getHandlers();
+  switch (type) {
+    case "GET_MSW_HANDLERS_REQUEST":
+      if (window.mswControl?.getHandlers) {
+        const handlers = window.mswControl.getHandlers();
+        window.postMessage(
+          { source, type: "GET_MSW_HANDLERS_RESPONSE", payload: handlers },
+          "*"
+        );
+      }
+      break;
+    case "TOGGLE_HANDLER_REQUEST":
+      const { id, enabled } = payload;
+      if (enabled) {
+        window.mswControl.enableHandler(id);
+      } else {
+        window.mswControl.disableHandler(id);
+      }
       window.postMessage(
-        { source, type: "GET_MSW_HANDLERS_RESPONSE", payload: handlers },
+        { source, type: "TOGGLE_HANDLER_RESPONSE", payload: { id, enabled } },
         "*"
       );
-    } else {
-      window.postMessage(
-        {
-          source,
-          type: "GET_MSW_HANDLERS_RESPONSE",
-          payload: null,
-          error: "MSW_NOT_FOUND",
-        },
-        "*"
-      );
-    }
-    return;
+      break;
+    default:
+      break;
   }
 
-  if (type === "TOGGLE_HANDLER_REQUEST") {
-    const { id, enabled } = payload;
-    if (enabled) {
-      window.mswControl.enableHandler(id);
-    } else {
-      window.mswControl.disableHandler(id);
-    }
-    window.postMessage(
-      { source, type: "TOGGLE_HANDLER_RESPONSE", payload: { id, enabled } },
-      "*"
-    );
-  }
+  return;
 });
 
 // 2. MSW 상태 변경 이벤트를 감지하여 content-script로 전달
 // (MSWController의 reinitialize 메서드는 'mswStateChanged' 이벤트를 발생시킴)
 window.addEventListener("mswStateChanged", () => {
   window.postMessage({ source, type: "MSW_STATE_CHANGED_EVENT" }, "*");
+  return;
 });

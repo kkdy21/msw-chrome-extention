@@ -1,6 +1,5 @@
 import { MockHandlerInfo } from "@/types/types";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-// 올바른 타입 경로를 위해 상대 경로 사용
 
 type GroupedHandlers = Record<string, MockHandlerInfo[]>;
 
@@ -44,6 +43,9 @@ function App() {
           type: "GET_STATE",
           tabId: chrome.devtools.inspectedWindow.tabId,
         });
+      } else if (message.type === "MSW_NOT_FOUND_NOTIFICATION") {
+        setError("MSW Not Found");
+        setLoading(false);
       }
     });
   }, []);
