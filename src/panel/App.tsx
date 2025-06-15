@@ -1,5 +1,6 @@
 import { MockHandlerInfo } from "@/types/types";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import "./App.css";
 
 type GroupedHandlers = Record<string, MockHandlerInfo[]>;
 
@@ -75,6 +76,49 @@ function App() {
     }
   };
 
+  const handleToggleAll = (currentEnabled: boolean) => {
+    if (portRef.current && handlers) {
+      portRef.current?.postMessage({
+        type: "TOGGLE_ALL_HANDLER",
+        payload: { enabled: currentEnabled },
+        tabId: chrome.devtools.inspectedWindow.tabId,
+      });
+    }
+  };
+
+  const handleToggleGroup = (groupName: string, currentEnabled: boolean) => {
+    if (portRef.current && groupedHandlers[groupName]) {
+      portRef.current?.postMessage({
+        type: "TOGGLE_GROUP_HANDLER",
+        payload: {
+          groupName,
+          enabled: currentEnabled,
+        },
+        tabId: chrome.devtools.inspectedWindow.tabId,
+      });
+    }
+  };
+
+  const isGroupAllEnabled = (groupName: string) => {
+    return (
+      groupedHandlers[groupName]?.every((handler) => handler.enabled) ?? false
+    );
+  };
+
+  const isGroupAllDisabled = (groupName: string) => {
+    return (
+      groupedHandlers[groupName]?.every((handler) => !handler.enabled) ?? false
+    );
+  };
+
+  const isAllEnabled = useMemo(() => {
+    return handlers?.every((handler) => handler.enabled) ?? false;
+  }, [handlers]);
+
+  const isAllDisabled = useMemo(() => {
+    return handlers?.every((handler) => !handler.enabled) ?? false;
+  }, [handlers]);
+
   useEffect(() => {
     // 백그라운드 스크립트와 연결 설정
     inititialize();
@@ -103,9 +147,26 @@ function App() {
   return (
     <div className="container">
       <h1>MSW Controls</h1>
+      <div className="global-controls">
+        <button onClick={() => handleToggleAll(true)} disabled={isAllEnabled}>
+          전체 활성화
+        </button>
+        <button onClick={() => handleToggleAll(false)} disabled={isAllDisabled}>
+          전체 비활성화
+        </button>
+      </div>
       {Object.entries(groupedHandlers).map(([groupName, handlerList]) => (
         <details key={groupName} open>
-          <summary>{groupName}</summary>
+          <summary className="group-box">
+            <div className="group-header">
+              <input
+                type="checkbox"
+                checked={isGroupAllEnabled(groupName)}
+                onChange={(e) => handleToggleGroup(groupName, e.target.checked)}
+              />
+              <span>{groupName}</span>
+            </div>
+          </summary>
           <ul>
             {handlerList.map((handler) => (
               <li key={handler.id}>
@@ -129,3 +190,8 @@ function App() {
 }
 
 export default App;
+
+/*
+FIXME 
+1. group id 로 enable불가 문제
+*/

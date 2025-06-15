@@ -26,6 +26,26 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         "*"
       );
       break;
+    case "TOGGLE_ALL_HANDLER":
+      window.postMessage(
+        {
+          source,
+          type: "TOGGLE_ALL_HANDLER_REQUEST",
+          payload: message.payload,
+        },
+        "*"
+      );
+      break;
+    case "TOGGLE_GROUP_HANDLER":
+      window.postMessage(
+        {
+          source,
+          type: "TOGGLE_GROUP_HANDLER_REQUEST",
+          payload: message.payload,
+        },
+        "*"
+      );
+      break;
   }
   return true;
 });

@@ -37,16 +37,36 @@ window.addEventListener("message", async (event) => {
       }
       break;
     case "TOGGLE_HANDLER_REQUEST":
-      const { id, enabled } = payload;
-      if (enabled) {
+      const { id, enabled: handlerEnabled } = payload;
+      if (handlerEnabled) {
         window.mswControl.enableHandler(id);
       } else {
         window.mswControl.disableHandler(id);
       }
       window.postMessage(
-        { source, type: "TOGGLE_HANDLER_RESPONSE", payload: { id, enabled } },
+        {
+          source,
+          type: "TOGGLE_HANDLER_RESPONSE",
+          payload: { id, enabled: handlerEnabled },
+        },
         "*"
       );
+      break;
+    case "TOGGLE_ALL_HANDLER_REQUEST":
+      const { enabled: allEnabled } = payload;
+      if (allEnabled) {
+        window.mswControl.enableAllHandlers();
+      } else {
+        window.mswControl.disableAllHandlers();
+      }
+      break;
+    case "TOGGLE_GROUP_HANDLER_REQUEST":
+      const { groupName, enabled: groupEnabled } = payload;
+      if (groupEnabled) {
+        window.mswControl.enableGroup(groupName);
+      } else {
+        window.mswControl.disableGroup(groupName);
+      }
       break;
     default:
       break;

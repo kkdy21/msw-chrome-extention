@@ -1,13 +1,22 @@
-interface MSWControl {
-  getHandlers: () => any[];
-  enableHandler: (id: string) => Promise<void>;
-  disableHandler: (id: string) => Promise<void>;
-}
+export type HandlerEnabledState = Record<string, boolean>;
 
 declare global {
   interface Window {
-    mswControl: MSWControl;
+    mswControl?: {
+      enableHandler: (handlerId: string) => Promise<void>;
+      disableHandler: (handlerId: string) => Promise<void>;
+      isHandlerEnabled: (handlerId: string) => boolean | undefined;
+      listHandlers: () => void;
+      enableAllHandlers: () => Promise<void>;
+      disableAllHandlers: () => Promise<void>;
+      enableGroup: (groupId: string) => Promise<void>;
+      disableGroup: (groupId: string) => Promise<void>;
+      getCurrentConfig: () => HandlerEnabledState;
+      saveConfigToLocalStorage: () => Promise<void>;
+      loadConfigFromLocalStorage: () => Promise<void>;
+      resetToInitialCodeConfig: () => Promise<void>;
+      isWorkerRunning: () => boolean;
+      help: () => void;
+    };
   }
 }
-
-export {};
