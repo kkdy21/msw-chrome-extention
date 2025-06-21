@@ -11,7 +11,7 @@ function App() {
   const portRef = useRef<chrome.runtime.Port | null>(null);
 
   const inititialize = useCallback(() => {
-    console.log("패널 초기화 및 백그라운드 연결을 시작합니다...");
+    console.log("Initializing panel and connecting to background script...");
 
     portRef.current?.disconnect();
 
@@ -26,7 +26,7 @@ function App() {
 
     // 백그라운드 스크립트로부터 메시지 수신
     port.onMessage.addListener((message) => {
-      console.log("패널이 메시지를 수신했습니다:", message);
+      console.log("Panel received a message:", message);
       if (message.type === "INIT_SUCCESS") {
         // 연결 준비 완료, 초기 상태 요청
         port.postMessage({
@@ -124,9 +124,7 @@ function App() {
     inititialize();
 
     const handleNavigated = (url: string) => {
-      console.log(
-        `페이지가 다음 주소로 이동했습니다. ${url} 연결을 재초기화합니다.`
-      );
+      console.log(`Page navigated to ${url}. Re-initializing connection.`);
       inititialize();
     };
 
@@ -141,18 +139,18 @@ function App() {
     };
   }, [inititialize]);
 
-  if (loading) return <div>MSW 핸들러 로딩 중...</div>;
+  if (loading) return <div>Loading MSW handlers...</div>;
   if (error) return <div className="error">{error}</div>;
 
   return (
     <div className="container">
-      <h1>MSW Controls</h1>
+      <h1>MSW Handler Control Panel</h1>
       <div className="global-controls">
         <button onClick={() => handleToggleAll(true)} disabled={isAllEnabled}>
-          전체 활성화
+          Enable All
         </button>
         <button onClick={() => handleToggleAll(false)} disabled={isAllDisabled}>
-          전체 비활성화
+          Disable All
         </button>
       </div>
       {Object.entries(groupedHandlers).map(([groupName, handlerList]) => (
